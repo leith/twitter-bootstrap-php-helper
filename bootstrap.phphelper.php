@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.5
+ * @version 0.6
  */
 class TwitterBootstrapPHPHelper {
 	var $content;
@@ -432,7 +432,29 @@ class TwitterBootstrapPHPHelper {
 		return $html;
 	}
 
-	/* TODO : button */
+	public function submit($opts = array()) { return $this->button(array('type' => 'submit', 'label' => 'Submit', 'name' => 'submit', 'value' => 'Submit') + $opts); }
+	public function button($opts = array()) {
+		$opts = self::apply_defaults($opts, array(
+			'disabled' => false,
+			'label' => '',
+			'value' => '',
+			'prepend' => '',
+			'append' => '',
+		));
+		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
+		$attrs = array_merge(
+			array('value' => $opts->value),
+			empty($opts->type)     ? array('type' => 'button') : array('type' => $opts->type),
+			empty($opts->class)    ? array('class' => 'btn') : array('class' => 'btn '.$opts->class),
+			empty($opts->name)     ? array() : array('name' => $opts->name, 'id' => $opts->id),
+			empty($opts->disabled) ? array() : array('disabled' => 'disabled')
+		);
+
+		$html = self::tag_open("input", $attrs);
+
+		$this->store($html, $opts);
+		return $html;
+	}
 }
 
 ?>
