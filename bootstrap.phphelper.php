@@ -8,27 +8,27 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6
+ * @version 0.6.1
  */
 class TwitterBootstrapPHPHelper {
-	var $content;
-	var $store_html = false;
-	var $current_form_tag = 'form';
-	var $current_active_tab = array();
+	public $content;
+	public $store_html = false;
+	public $current_form_tag = 'form';
+	public $current_active_tab = array();
 	
-	function __construct($store_html = true) {
-		$content = '';
+	public function __construct($store_html = true) {
+		$this->content = '';
 		$this->store_html = $store_html;
 	}
 
-	function render($return = true) {
+	public function render($return = true) {
 		$content = $this->content;
 		$this->content = '';
 		if ($return) return $content;
 		else echo $content;
 	}
 	
-	function add($html) {
+	public function add($html) {
 		$this->store((string) $html);
 	}
 
@@ -65,7 +65,7 @@ class TwitterBootstrapPHPHelper {
 			if ($value != null) $out .= ' '.$attribute.'="'.htmlspecialchars($value, ENT_QUOTES).'"';
 		return $out;
 	}
-	public static function id4name($name, $value = null) { return self::IdForname($name,$value); }
+	public static function id4name($name, $value = null) { return self::id_for_name($name,$value); }
 	public static function id_for_name($name, $value = null) {
 		$new_name = str_replace(array('[', ']'), array('_', ''), $name);
 		if ($value !== null) $new_name .= (substr($new_name, -1) == '_' ? '' : '_').$value;
@@ -167,8 +167,8 @@ class TwitterBootstrapPHPHelper {
 			(empty($opts->image) ? array("data-src" => "holder.js/{$opts->size}/text:{$opts->alt}") : array("src" => $opts->image)),
 			array('alt' => $opts->alt, 'return_only' => true)
 		));
-		if (empty($template->name)) $html .= $this->h4($opts->name, array('return_only' => true));
-		if (empty($template->description)) $html .= $this->p($opts->description, array('return_only' => true));
+		if (empty($opts->name)) $html .= $this->h4($opts->name, array('return_only' => true));
+		if (empty($opts->description)) $html .= $this->p($opts->description, array('return_only' => true));
 		$html .= '</div>';
 
 		$this->store($html, $opts);
@@ -206,7 +206,7 @@ class TwitterBootstrapPHPHelper {
 
 	public function tabs_open($tabs, $opts = array()) {
 		$tab_ids = array_keys($tabs);
-		if (!empty($tabs_ids)) array_walk($tabs, function(&$v,&$k) { $k = 'tab_'.$k; });
+		if (!empty($tab_ids)) array_walk($tabs, function(&$v,&$k) { $k = 'tab_'.$k; });
 
 		$opts = self::apply_defaults($opts, array(
 			'direction' => 'above',
@@ -417,7 +417,7 @@ class TwitterBootstrapPHPHelper {
 			// stringification is to allow '0' and other numeric values to be passed as value params
 			$options[] = self::tag('option', $label, array('value' => "$value") + ("$value" == "{$opts->value}" ? array('selected' => 'selected') : array()) + $option_attrs);
 		}
-		$html .= self::tag("select", join($options), $attrs);
+		$html .= self::tag("select", implode($options), $attrs);
 
 		$this->store($html, $opts);
 		return $html;
