@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.1
+ * @version 0.6.2
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -226,14 +226,14 @@ class TwitterBootstrapPHPHelper {
 		$html .= "</ul>";
 		$html .= self::tag_open('div', array('class' => 'tab-content'));
 
-		$this->store($html); 
+		$this->store($html, $opts); 
 		return $html; 
 	}
 	public function tabs_close() { array_pop($this->current_active_tab); $html = '</div></div>'; $this->store($html); return $html; }
 
 	public function tab_open($key, $opts = array()) {
 		$html = "<div class='tab-pane".($key == reset($this->current_active_tab) ? ' active' : '')."' id='tab_{$key}'>";
-		$this->store($html); 
+		$this->store($html, $opts); 
 		return $html; 
 	}
 	public function tab_close() { $html = '</div>'; $this->store($html); return $html; }
@@ -417,7 +417,7 @@ class TwitterBootstrapPHPHelper {
 			// stringification is to allow '0' and other numeric values to be passed as value params
 			$options[] = self::tag('option', $label, array('value' => "$value") + ("$value" == "{$opts->value}" ? array('selected' => 'selected') : array()) + $option_attrs);
 		}
-		$html .= self::tag("select", implode($options), $attrs);
+		$html .= self::tag("select", implode('', $options), $attrs);
 
 		$this->store($html, $opts);
 		return $html;
