@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.2
+ * @version 0.6.3
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -270,18 +270,24 @@ class TwitterBootstrapPHPHelper {
 	/* form inputs */
 	public function bool($opts = array()) { return $this->checkbox($opts); }
 	public function boolean($opts = array()) { return $this->checkbox($opts); }
-	public function checkbox($opts = array()) {
+	public function checkbox($opts = array()) { return $this->radio_checkbox('checkbox', $opts); }
+	public function radio($opts = array()) { return $this->radio_checkbox('radio', $opts); }
+
+	/**
+	 * @param string $type either 'radio' or 'checkbox'
+	 */
+	private function radio_checkbox($type, $opts = array()) {
 		$opts = self::apply_defaults($opts, array(
-            'disabled' => false,
-            'checked' => false,
-            'label' => '',
-            'value' => 1,
-            'inline' => false,
-            'explain' => '',
-        ));
-        if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name, $opts->value);
+			'disabled' => false,
+			'checked' => false,
+			'label' => '',
+			'value' => 1,
+			'inline' => false,
+			'explain' => '',
+		));
+		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name, $opts->value);
 		$attrs = array_merge(
-			array('type' => "checkbox", 'value' => $opts->value),
+			array('type' => $type, 'value' => $opts->value),
 			empty($opts->checked)  ? array() : array('checked' => 'checked'),
 			empty($opts->name)     ? array() : array('name' => $opts->name, 'id' => $opts->id),
 			empty($opts->disabled) ? array() : array('disabled' => 'disabled')
@@ -289,7 +295,7 @@ class TwitterBootstrapPHPHelper {
 
 		$has_label = trim($opts->label) != '';
 
-		$html = $has_label ? "<label class='checkbox".($opts->disabled ? " muted" : "").($opts->inline ? " inline" : "")."'>" : "";
+		$html = $has_label ? "<label class='".$type.($opts->disabled ? " muted" : "").($opts->inline ? " inline" : "")."'>" : "";
 		$html .= self::tag_open("input", $attrs);
 		$html .= $has_label ? "\n{$opts->label}</label>" : "";
 		$html .= self::explain($opts->explain);
@@ -305,10 +311,10 @@ class TwitterBootstrapPHPHelper {
 
 	public function radio_list($name, $selected, $radios = array(), $opts = array()) {
 		$opts = self::apply_defaults($opts, array(
-            'disabled' => false,
-            'inline' => false,
-            'explain' => '',
-        ));
+			'disabled' => false,
+			'inline' => false,
+			'explain' => '',
+		));
 
 		$html = '';
 		foreach ($radios as $radio_opts) {
@@ -316,8 +322,8 @@ class TwitterBootstrapPHPHelper {
 				'return_only' => true, // leave store() call to radio_list()
 				'checked' => $selected == (is_array($radio_opts) ? $radio_opts['value'] : $radio_opts->value),
 				'inline' => $opts->inline,
-	            'disabled' => $opts->disabled,
-	            'name' => $name,
+				'disabled' => $opts->disabled,
+				'name' => $name,
 			));
 
 			$html .= $this->radio($radio_opts);
@@ -328,45 +334,17 @@ class TwitterBootstrapPHPHelper {
 		return $html;
 	}
 
-	public function radio($opts = array()) {
-		$opts = self::apply_defaults($opts, array(
-            'disabled' => false,
-            'checked' => false,
-            'label' => '',
-            'value' => 1,
-            'inline' => false,
-            'explain' => '',
-        ));
-        if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name, $opts->value);
-		$attrs = array_merge(
-			array('type' => "radio", 'value' => $opts->value),
-			empty($opts->checked)  ? array() : array('checked' => 'checked'),
-			empty($opts->name)     ? array() : array('name' => $opts->name, 'id' => $opts->id),
-			empty($opts->disabled) ? array() : array('disabled' => 'disabled')
-		);
-
-		$has_label = trim($opts->label) != '';
-
-		$html = $has_label ? "<label class='radio".($opts->disabled ? " muted" : "").($opts->inline ? " inline" : "")."'>" : "";
-		$html .= self::tag_open("input", $attrs);
-		$html .= $has_label ? "\n{$opts->label}</label>" : "";
-		$html .= self::explain($opts->explain);
-
-		$this->store($html, $opts);
-		return $html;
-	}
-
 	public function textbox($opts = array()) { return $this->text($opts); }
 	public function text($opts = array()) {
 		$opts = self::apply_defaults($opts, array(
-            'disabled' => false,
-            'label' => '',
-            'value' => '',
-            'placeholder' => '',
-            'prepend' => '',
-            'append' => '',
-        ));
-        if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
+			'disabled' => false,
+			'label' => '',
+			'value' => '',
+			'placeholder' => '',
+			'prepend' => '',
+			'append' => '',
+		));
+		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
 		$attrs = array_merge(
 			array('type' => "text", 'value' => $opts->value, 'placeholder' => $opts->placeholder),
 			empty($opts->class)    ? array() : array('class' => $opts->class),
@@ -393,13 +371,13 @@ class TwitterBootstrapPHPHelper {
 	public function pulldown($opts = array()) { return $this->select($opts); }
 	public function select($opts = array()) {
 		$opts = self::apply_defaults($opts, array(
-            'disabled' => false,
-            'label' => '',
-            'value' => '',
-            'options' => array(),
-            'none_option' => false,
-        ));
-        if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
+			'disabled' => false,
+			'label' => '',
+			'value' => '',
+			'options' => array(),
+			'none_option' => false,
+		));
+		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
 		$attrs = array_merge(
 			empty($opts->class)    ? array() : array('class' => $opts->class),
 			empty($opts->name)     ? array() : array('name' => $opts->name, 'id' => $opts->id),
