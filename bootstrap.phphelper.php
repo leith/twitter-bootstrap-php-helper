@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.3
+ * @version 0.6.4
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -40,6 +40,7 @@ class TwitterBootstrapPHPHelper {
 	 *   tag_open : open an HTML tag
 	 *   parse_html_options : convert an array to a set of HTML attributes
 	 *   id_for_name : convert name containing [] into unique id
+	 *   check_id : add id based on name if no id is supplied
 	 */
 	private static function apply_defaults($opts, $defaults = array()) {
 		if (!is_object($opts)) $opts = (object)$opts;
@@ -70,6 +71,11 @@ class TwitterBootstrapPHPHelper {
 		$new_name = str_replace(array('[', ']'), array('_', ''), $name);
 		if ($value !== null) $new_name .= (substr($new_name, -1) == '_' ? '' : '_').$value;
 		return htmlspecialchars($new_name, ENT_QUOTES);
+	}
+	private static function check_id($opts = array()) {
+		if (!is_object($opts)) $opts = (object)$opts;
+		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name, $opts->value);
+		return $opts;
 	}
 	/* explain() isn't strictly Bootstrap, but provides a nice (?) icon for use with JS .popover() */
 	public static function explain($content, $opts = array()) {
@@ -285,7 +291,7 @@ class TwitterBootstrapPHPHelper {
 			'inline' => false,
 			'explain' => '',
 		));
-		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name, $opts->value);
+		$opts = self::check_id($opts);
 		$attrs = array_merge(
 			array('type' => $type, 'value' => $opts->value),
 			empty($opts->checked)  ? array() : array('checked' => 'checked'),
@@ -344,7 +350,7 @@ class TwitterBootstrapPHPHelper {
 			'prepend' => '',
 			'append' => '',
 		));
-		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
+		$opts = self::check_id($opts);
 		$attrs = array_merge(
 			array('type' => "text", 'value' => $opts->value, 'placeholder' => $opts->placeholder),
 			empty($opts->class)    ? array() : array('class' => $opts->class),
@@ -377,7 +383,7 @@ class TwitterBootstrapPHPHelper {
 			'options' => array(),
 			'none_option' => false,
 		));
-		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
+		$opts = self::check_id($opts);
 		$attrs = array_merge(
 			empty($opts->class)    ? array() : array('class' => $opts->class),
 			empty($opts->name)     ? array() : array('name' => $opts->name, 'id' => $opts->id),
@@ -419,7 +425,7 @@ class TwitterBootstrapPHPHelper {
 			'prepend' => '',
 			'append' => '',
 		));
-		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name);
+		$opts = self::check_id($opts);
 		$attrs = array_merge(
 			array('value' => $opts->value),
 			empty($opts->type)     ? array('type' => 'button') : array('type' => $opts->type),
