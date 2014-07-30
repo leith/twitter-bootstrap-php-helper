@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.4
+ * @version 0.6.5
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -69,7 +69,7 @@ class TwitterBootstrapPHPHelper {
 	public static function id4name($name, $value = null) { return self::id_for_name($name,$value); }
 	public static function id_for_name($name, $value = null) {
 		$new_name = str_replace(array('[', ']'), array('_', ''), $name);
-		if ($value !== null) $new_name .= (substr($new_name, -1) == '_' ? '' : '_').$value;
+		if ($value !== null && $value !== '') $new_name .= (substr($new_name, -1) == '_' ? '' : '_').$value;
 		return htmlspecialchars($new_name, ENT_QUOTES);
 	}
 	private static function check_id($opts = array()) {
