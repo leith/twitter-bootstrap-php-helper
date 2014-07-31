@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.5
+ * @version 0.6.6
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -151,6 +151,15 @@ class TwitterBootstrapPHPHelper {
 	public function img($src, $opts = array()) { $html = self::tag_open('img', $opts + array('src' => $src)); $this->store($html, $opts); return $html; }
 
 	public function gap($opts = array()) { $html = '<br>'; $this->store($html, $opts); return $html; }
+	public function clear($opts = array()) { 
+		$opts = self::apply_defaults($opts, array(
+			'tag' => 'div',
+			'class' => array('value' => 'clearfix ', 'prefix' => true),
+		));
+		$html = self::tag($opts->tag, '', array('class' => $opts->class)); 
+		$this->store($html, $opts); 
+		return $html; 
+	}
 
 	/* icon helper */
 	public function icon($name, $opts = array()) { $html = self::tag('i', '', array('class' => 'icon-'.$name)); $this->store($html, $opts); return $html; }
@@ -439,6 +448,10 @@ class TwitterBootstrapPHPHelper {
 		$this->store($html, $opts);
 		return $html;
 	}
+
+	// TODO : add layout helpers
+
+	// TODO : add table helpers
 }
 
 ?>
