@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.6
+ * @version 0.6.7
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -135,8 +135,9 @@ class TwitterBootstrapPHPHelper {
 			'explain' => '', 
 		));
 		if (trim($opts->explain) != '') $opts->explain = " ".self::explain($opts->explain, array('class' => 'heading-explain'));
-
-		$html = self::tag($tag, $text.$opts->explain, array('class' => $opts->class)); 
+		$attrs = clone($opts);
+		unset($attrs->explain);
+		$html = self::tag($tag, $text.$opts->explain, $attrs);
 		$this->store($html, $opts);
 		return $html; 
 	}
