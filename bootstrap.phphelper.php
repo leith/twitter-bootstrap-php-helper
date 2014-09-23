@@ -8,7 +8,7 @@
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.7
+ * @version 0.6.8
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -137,7 +137,7 @@ class TwitterBootstrapPHPHelper {
 		if (trim($opts->explain) != '') $opts->explain = " ".self::explain($opts->explain, array('class' => 'heading-explain'));
 		$attrs = clone($opts);
 		unset($attrs->explain);
-		$html = self::tag($tag, $text.$opts->explain, $attrs);
+		$html = self::tag($tag, $text.$opts->explain, (array) $attrs);
 		$this->store($html, $opts);
 		return $html; 
 	}
@@ -426,7 +426,15 @@ class TwitterBootstrapPHPHelper {
 		return $html;
 	}
 
-	public function submit($opts = array()) { return $this->button(array('type' => 'submit', 'label' => 'Submit', 'name' => 'submit', 'value' => 'Submit') + $opts); }
+	public function submit($opts = array()) { 
+		$opts = self::apply_defaults($opts, array(
+			'type' => 'submit', 
+			'label' => 'Submit', 
+			'name' => 'submit', 
+			'value' => 'Submit',
+		));
+		return $this->button($opts); 
+	}
 	public function button($opts = array()) {
 		$opts = self::apply_defaults($opts, array(
 			'disabled' => false,
