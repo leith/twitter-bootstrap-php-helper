@@ -3,12 +3,12 @@
  * TwitterBootstrapPHPHelper Class
  *
  * Helper class to create HTML that's nicely compliant with Twitter Bootstrap v2.3.2 -- http://twitter.github.io/bootstrap/
- * Intended to work with Font Awesome -- http://fortawesome.github.io/Font-Awesome/
+ * Intended to work with Font Awesome v3.2.1 -- http://fortawesome.github.io/Font-Awesome/
  *
  * @author Leith Caldwell
  * @copyright Copyright (c) 2013, Leith Caldwell
  * @license http://creativecommons.org/licenses/by-sa/3.0/deed.en_US CC BY-SA 3.0
- * @version 0.6.8
+ * @version 0.7.0
  */
 class TwitterBootstrapPHPHelper {
 	public $content;
@@ -77,6 +77,27 @@ class TwitterBootstrapPHPHelper {
 		if (!empty($opts->name) && empty($opts->id)) $opts->id = self::id_for_name($opts->name, $opts->value);
 		return $opts;
 	}
+
+	/**
+	 * Method hook for when called method is undefined, assume a regular tag
+	 *
+	 * @param string $name The tag name
+	 * @param array $arguments The content and options passed to the tag; ignores any other parameters
+	 * @return string $html
+	 */
+	public function __call($name, $arguments) {
+		// intentionally fall through and add defaults as we go
+		switch (count($arguments)) {
+			case 0:  $arguments = array("");
+			case 1:  $arguments += array(1 => array());
+			case 2:
+			default: list($text, $opts) = $arguments;
+		}
+		$html = self::tag($name, $text, $opts); 
+		$this->store($html, $opts); 
+		return $html;
+	}
+
 	/* explain() isn't strictly Bootstrap, but provides a nice (?) icon for use with JS .popover() */
 	public static function explain($content, $opts = array()) {
 		$html = '';
@@ -146,10 +167,32 @@ class TwitterBootstrapPHPHelper {
 	public function subheading($text, $opts = array())   { return self::_heading('h3', $text, array('class' => 'subheading'.(isset($opts['class']) ? ' '.$opts['class'] : '')) + $opts); }
 
 
-	/* standard tags */
-	public function p($text, $opts = array()) { $html = self::tag('p', $text, $opts); $this->store($html, $opts); return $html; }
-	public function h4($text, $opts = array()) { $html = self::tag('h4', $text, $opts); $this->store($html, $opts); return $html; }
+	/* standard tags not covered by method hook */
 	public function img($src, $opts = array()) { $html = self::tag_open('img', $opts + array('src' => $src)); $this->store($html, $opts); return $html; }
+
+	/**
+	 * @param string $tag
+	 * @param array $items List of items, either HTML string, or ['content' => "HTML", 'opts' => []]
+	 */
+	private function _list($tag, $items = array(), $opts = array()) {
+		$opts = self::apply_defaults($opts, array(
+			'class' => '',
+			'item_opts' => array(),
+		));
+
+		$html = self::tag_open($tag, array('class' => $opts->class));
+		foreach ($items as $key => $item) {
+			if (is_array($item)) $item = (object)$item;
+			$content = is_object($item) ? $item->content : $item;
+			$item_opts = self::apply_defaults(is_object($item) ? $item->opts : array(), $opts->item_opts);
+			$html .= self::tag('li', $content, $item_opts);
+		}
+		$html .= "</$tag>";
+		$this->store($html, $opts); 
+		return $html;
+	}
+	public function ol($items, $opts = array()) { return self::_list('ol', $items, $opts); }
+	public function ul($items, $opts = array()) { return self::_list('ul', $items, $opts); }
 
 	public function gap($opts = array()) { $html = '<br>'; $this->store($html, $opts); return $html; }
 	public function clear($opts = array()) { 
@@ -203,18 +246,19 @@ class TwitterBootstrapPHPHelper {
 		// TODO : convert to generic validation call
 		if (!in_array($opts->active, $thumb_ids)) $opts->active = reset($thumb_ids);
 
-		$html = self::tag_open('ul', array('class' => 'thumbnails clearfix'));
-		$html .= $this->hidden($opts->name, $opts->active, array('return_only' => true));
+		$html = $this->hidden($opts->name, $opts->active, array('return_only' => true));
+		$items = array();
 		foreach ($thumbs as $thumb_id => $thumb) {
-			$html .= self::tag_open('li', array(
-				'class' => 'span3 selectable'.($thumb_id == $opts->active ? ' selected' : '').(empty($thumb->disabled) ? '' : ' muted'),
-				'data-value' => $thumb_id,
-				'data-input' => self::id_for_name($opts->name),
-			));
-			$html .= $this->thumbnail((array)$thumb + array('size' => $opts->size, 'alt' => $thumb->name, 'return_only' => true));
-			$html .= "</li>";
+			$items[] = array(
+				'content' => $this->thumbnail((array)$thumb + array('size' => $opts->size, 'alt' => $thumb->name, 'return_only' => true)),
+				'opts' => array(
+					'class' => 'span3 selectable'.($thumb_id == $opts->active ? ' selected' : '').(empty($thumb->disabled) ? '' : ' muted'),
+					'data-value' => $thumb_id,
+					'data-input' => self::id_for_name($opts->name),
+				)
+			);
 		}
-		$html .= '</ul>';
+		$html .= self::ul($items, array('class' => 'thumbnails clearfix', 'return_only' => true));
 
 		$this->store($html, $opts);
 		return $html;
@@ -225,6 +269,7 @@ class TwitterBootstrapPHPHelper {
 		if (!empty($tab_ids)) array_walk($tabs, function(&$v,&$k) { $k = 'tab_'.$k; });
 
 		$opts = self::apply_defaults($opts, array(
+			'type' => 'tabs',
 			'direction' => 'above',
 			'active' => reset($tab_ids), // first id -- TODO : somehow store active tab?
 		));
@@ -233,13 +278,18 @@ class TwitterBootstrapPHPHelper {
 
 		// TODO : convert to generic validation call
 		if (!in_array($opts->direction, array('','above','left','right','below'))) $opts->direction = 'above';
+		if (!in_array($opts->type, array('tabs','pills'))) $opts->type = 'tabs';
 
 		$html = "<div class='tabbable".($opts->direction == 'above' || $opts->direction == '' ? '' : 'tabs-'.$opts->direction)."'>";
-		$html .= self::tag_open('ul', array('class' => 'nav nav-tabs'));
+
+		$items = array();
 		foreach ($tabs as $key => $title) {
-			$html .= self::tag('li', self::tag('a', $title, array('href' => '#tab_'.$key, 'data-toggle' => 'tab')), $key == $opts->active ? array('class' => 'active') : array());
+			$items[] = array(
+				'content' => self::tag('a', $title, array('href' => '#tab_'.$key, 'data-toggle' => substr($opts->type, 0, -1))), 
+				'opts' => $key == $opts->active ? array('class' => 'active') : array()
+			);
 		}
-		$html .= "</ul>";
+		$html .= self::ul($items, array('class' => 'nav nav-'.$opts->type, 'return_only' => true));
 		$html .= self::tag_open('div', array('class' => 'tab-content'));
 
 		$this->store($html, $opts); 
