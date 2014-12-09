@@ -226,8 +226,8 @@ class TwitterBootstrapPHPHelper {
 			(empty($opts->image) ? array("data-src" => "holder.js/{$opts->size}/text:{$opts->alt}") : array("src" => $opts->image)),
 			array('alt' => $opts->alt, 'return_only' => true)
 		));
-		if (empty($opts->name)) $html .= $this->h4($opts->name, array('return_only' => true));
-		if (empty($opts->description)) $html .= $this->p($opts->description, array('return_only' => true));
+		if (empty($opts->name)) $html .= self::tag('h4', $opts->name);
+		if (empty($opts->description)) $html .= self::tag('p', $opts->description);
 		$html .= '</div>';
 
 		$this->store($html, $opts);
