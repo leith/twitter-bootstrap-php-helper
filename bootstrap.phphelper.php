@@ -156,7 +156,7 @@ class TwitterBootstrapPHPHelper {
 			'explain' => '', 
 		));
 		if (trim($opts->explain) != '') $opts->explain = " ".self::explain($opts->explain, array('class' => 'heading-explain'));
-		$attrs = clone($opts);
+		$attrs = clone $opts;
 		unset($attrs->explain);
 		$html = self::tag($tag, $text.$opts->explain, (array) $attrs);
 		$this->store($html, $opts);
